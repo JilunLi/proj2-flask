@@ -1,5 +1,5 @@
 """
-Pre-process a syllabus (class schedule) file. 
+Pre-process a syllabus (class schedule) file.
 
 """
 import arrow   # Dates and times
@@ -16,7 +16,7 @@ def process(raw):
     Line by line processing of syllabus file.  Each line that needs
     processing is preceded by 'head: ' for some string 'head'.  Lines
     may be continued if they don't contain ':'.  If # is the first
-    non-blank character on a line, it is a comment ad skipped. 
+    non-blank character on a line, it is a comment ad skipped.
     """
     field = None
     entry = {}
@@ -41,7 +41,7 @@ def process(raw):
         if field == "begin":
             try:
                 base = arrow.get(content, "MM/DD/YYYY")
-                # print("Base date {}".format(base.isoformat()))
+                print("Base date {}".format(base.isoformat()))
             except:
                 raise ValueError("Unable to parse date {}".format(content))
 
@@ -52,6 +52,7 @@ def process(raw):
             entry['topic'] = ""
             entry['project'] = ""
             entry['week'] = content
+            entry['startday'] = base.replace(weeks =+ int(content)-1 ).format("ddd MM/DD/YYYY")
 
         elif field == 'topic' or field == 'project':
             entry[field] = content
@@ -62,7 +63,7 @@ def process(raw):
     if entry:
         cooked.append(entry)
 
-    return cooked
+    return cooked, base
 
 
 def main():

@@ -1,8 +1,8 @@
 """
 Very simple Flask web site, with one page
-displaying a course schedule.  We pre-process the 
-input file to set correct dates and highlight the 
-current week (if the academic term is in session). 
+displaying a course schedule.  We pre-process the
+input file to set correct dates and highlight the
+current week (if the academic term is in session).
 
 """
 
@@ -32,7 +32,7 @@ if configuration.DEBUG:
 # Pre-processed schedule is global, so be careful to update
 # it atomically in the view functions.
 #
-schedule = pre.process(open(configuration.SYLLABUS))
+schedule, base = pre.process(open(configuration.SYLLABUS))
 
 
 ###
@@ -47,6 +47,9 @@ def index():
     """Main application page; most users see only this"""
     app.logger.debug("Main page entry")
     flask.g.schedule = schedule  # To be accessible in Jinja2 on page
+    today = arrow.now()   # Default, replaced if file has 'begin: ...'
+    flask.g.hw = (today - base).days // 7 + 1
+    print (flask.g.hw)
     return flask.render_template('syllabus.html')
 
 
@@ -55,7 +58,8 @@ def refresh():
     """Admin user (or debugger) can use this to reload the schedule."""
     app.logger.debug("Refreshing schedule")
     global schedule
-    schedule = pre.process(open(configuration.SYLLABUS))
+    global base
+    schedule, base = pre.process(open(configuration.SYLLABUS))
     return flask.redirect(flask.url_for("index"))
 
 ### Error pages ###
